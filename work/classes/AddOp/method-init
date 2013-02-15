@@ -1,6 +1,0 @@
-source /home/tanner/src/bash/objects.bash
-Value1=${1:-Value1}
-Value2=${2:-Value2}
-echo $Value1 > Value1
-echo $Value2 > Value2
-

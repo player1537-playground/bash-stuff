@@ -1,4 +1,0 @@
-source /home/tanner/src/bash/objects.bash
-n=${1:-n}
-echo $n > value
-

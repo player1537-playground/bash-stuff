@@ -1,4 +1,0 @@
-source /home/tanner/src/bash/objects.bash
-call_method $(cat Value1) getValue > a
-call_method $(cat Value2) getValue > b
-

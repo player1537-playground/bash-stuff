@@ -1,3 +1,0 @@
-source /home/tanner/src/bash/objects.bash
-Op=${1:-OPER}
-echo "($(call_method $(cat Value1) printSelf)$Op$(call_method $(cat Value2) printSelf))"
