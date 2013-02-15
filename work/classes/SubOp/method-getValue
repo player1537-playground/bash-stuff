@@ -1,0 +1,4 @@
+source /home/tanner/src/bash/objects.bash
+super
+echo $(($(cat a) - $(cat b)))
+

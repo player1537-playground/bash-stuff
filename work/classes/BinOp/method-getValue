@@ -1,0 +1,3 @@
+source /home/tanner/src/bash/objects.bash
+call_method this evaluateChildren
+
