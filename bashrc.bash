@@ -179,3 +179,14 @@ function prompt_command() {
 }
 PS1="\$(prompt_command \$?)"
 alias z="source $HOME/.bashrc"
+alias -- -='cd ..'
+
+function _work() { 
+  local cur
+  _get_comp_words_by_ref cur
+  cd /media/3764-3031/tanner/src/
+  _filedir
+  _expand
+} 
+complete -F _work work
+
