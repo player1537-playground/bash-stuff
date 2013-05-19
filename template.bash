@@ -1,8 +1,11 @@
 #!/bin/bash
 
+OUTPUTDIR=$PWD/output
+DEBUG=${DEBUG:-0}
+
 function template() {
     local file line code codeprefix codesuffix pre suf var insidevar
-    file=$1
+    file=${1?-Pass a file}
     codeprefix="{%"
     codesuffix="%}"
     varprefix="{{"
@@ -28,7 +31,7 @@ function template() {
 	    echo "$code"
 	    [[ $suf ]] && echo "echo \"$suf\""
 	elif expr "$line" : ".*${equalprefix}${equalsuffix}" &>/dev/null; then
-	    echo "EOF"
+	    #echo "EOF"
 	    echo ")"
 	    insidevar=0
 	elif expr "$line" : ".*${equalprefix}.*${equalsuffix}" &>/dev/null; then
@@ -41,22 +44,36 @@ function template() {
 	    #var=${line##*$codeprefix}
 	    #var=${var%%$codesuffix*}
 	    var=$(expr "$line" : ".*${equalprefix}[ \t]*\([^ \t]*\)[ \t]*${equalsuffix}")
-	    echo "$var=\$(cat <<EOF"
+	    echo "$var=\$("
 	    insidevar=1
-	elif [[ $insidevar == 1 ]]; then
-	    echo "$line"
+	#elif [[ $insidevar == 1 ]]; then
+	 #   echo "$line"
 	else
-	    echo "echo \"$line\""
+	    printf "%s\n" "cat <<MOREEOF" "$line" "MOREEOF"
 	fi
     done <$file
 }
 
+function include() {
+    local file output
+    file=${1?-Error, pass a file to include}
+    output=$(template "$file")
+    if [[ $DEBUG == 1 ]]; then
+	echo "$output" >&2
+    fi
+    eval "$output"
+}    
+
 function main {
     local file output
-    file=${1?-Error, pass a file}
-    output=$(template "$file")
-    echo "$output" >&2
-    eval "$output"
+    if [[ $# > 1 ]]; then
+	output=$OUTPUTDIR/$1; shift
+	mkdir -p ${output%/*}
+    else
+	output=/dev/stdout
+    fi
+    file=$1
+    include "$file" > $output
 }
 
 main "$@"
