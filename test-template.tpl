@@ -1,15 +1,12 @@
 #!./template.bash
 
+{= Magic =}
+No escape from reality
+{==}
+
 <html>
-  <head>
-    <title>Listing {% ls | wc -l %} files</title>
-  </head>
   <body>
-    <li>
-      {% for i in *; do %}
-      <p>{{$i}}</p>
-      {% done %}
-    </li>
+    Magic is: "{{ $Magic }}"
   </body>
 </html>
 
