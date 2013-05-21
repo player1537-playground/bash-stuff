@@ -1,5 +1,48 @@
 #!/bin/bash
 
+# Givens:
+# USER=SeaBass
+# boolean=0
+# +----------------------------------------+----------------------------------------+
+# | Inputs                                 | Outputs                                |
+# |                                        |                                        |
+# +----------------------------------------+----------------------------------------+
+# | Hello World                            | Hello World                            |
+# |                                        |                                        |
+# +----------------------------------------+----------------------------------------+
+# | Hello {{ $USER }}!                     | Hello SeaBass!                         |
+# |                                        |                                        |
+# +----------------------------------------+----------------------------------------+
+# | {% if [[ $boolean == 0 ]]; then %}     |                                        |
+# | Nascar is awesome                      | Nascar is awesome                      |
+# | {% fi %}                               |                                        |
+# +----------------------------------------+----------------------------------------+
+# | {% if [[ $USER == Jeoffrey ]]; then %} |                                        |
+# | LabVIEW is my favorite language        |                                        |
+# | {% fi %}                               |                                        |
+# +----------------------------------------+----------------------------------------+
+# | {% for color in F00 0F0 00F; do %}     | <font color="#F00">Rawr</font>         |
+# | <font color="#{{ $color }}">Rawr</font>| <font color="#0F0">Rawr</font>         |
+# | {% done %}                             | <font color="#00F">Rawr</font>         |
+# +----------------------------------------+----------------------------------------+
+# | {= MAGIC_STRING =}                     |                                        |
+# | give us a perfect score                |                                        |
+# | {==}                                   |                                        |
+# | A good thing to keep in mind is to     | A good thing to keep in mind is to     |
+# |  {{ $MAGIC_STRING }}!                  |  give us a perfect score!              |
+# +----------------------------------------+----------------------------------------+
+# | {% date +%Y %} is the year of Linux on | 2013 is the year of Linux on           |
+# | the desktop!                           | the desktop!                           |
+# +----------------------------------------+----------------------------------------+
+# | {% include other-template.tpl %}       | <the contents of other-template.tpl,   |
+# |                                        |  interpreted>                          |
+# +----------------------------------------+----------------------------------------+
+
+
+
+
+
+
 OUTPUTDIR=$PWD/output
 DEBUG=${DEBUG:-0}
 
