@@ -38,13 +38,16 @@
 # |                                        |  interpreted>                          |
 # +----------------------------------------+----------------------------------------+
 
+## KNOWN ISSUES
+# You can't have more than one tag on each line.  I was lazy about that, but if 
+#+ something just doesn't seem to be working... that's why.
 
 
 
-
-
-OUTPUTDIR=$PWD/output
+OUTPUTDIR=${OUTPUTDIR:-$PWD/output}
 DEBUG=${DEBUG:-0}
+declare -i CURLEVEL
+CURLEVEL=1
 
 function template() {
     local file line code codeprefix codesuffix pre suf var insidevar
@@ -57,7 +60,7 @@ function template() {
     equalsuffix="=}"
     insidevar=0
     while true; do
-	read line || break
+	read -r line || break
 	line=$(expr "$line" : "^[ \t]*\(.*\)[ \t]*$")
 	if [[ $line =~ ^[\ \\t]*# ]]; then
 	    continue
@@ -87,36 +90,45 @@ function template() {
 	    #var=${line##*$codeprefix}
 	    #var=${var%%$codesuffix*}
 	    var=$(expr "$line" : ".*${equalprefix}[ \t]*\([^ \t]*\)[ \t]*${equalsuffix}")
-	    echo "$var=\$("
+	    echo "export $var=\$("
 	    insidevar=1
 	#elif [[ $insidevar == 1 ]]; then
 	 #   echo "$line"
 	else
-	    printf "%s\n" "cat <<MOREEOF" "$line" "MOREEOF"
+	    printf "%s\n" "cat <<MOREEOF${CURLEVEL}" "$line" "MOREEOF${CURLEVEL}"
 	fi
     done <$file
 }
 
 function include() {
     local file output
+    CURLEVEL+=1
     file=${1?-Error, pass a file to include}
     output=$(template "$file")
     if [[ $DEBUG == 1 ]]; then
 	echo "$output" >&2
     fi
-    eval "$output"
+    file=./$file
+    export SRC=${file%/*}
+    SRC=${file/%*} eval "$output"
+    CURLEVEL+=-1
 }    
 
+
+# main $outputfile $inputfile
+# main $inputfile
 function main {
     local file output
-    if [[ $# > 1 ]]; then
+    if [[ -n $2 ]]; then
 	output=$OUTPUTDIR/$1; shift
 	mkdir -p ${output%/*}
     else
 	output=/dev/stdout
     fi
     file=$1
-    include "$file" > $output
+    include "$file" | tr -d '' > $output
+    # The `tr` is there because  was showing up in the compiled files, and this is the easiest fix:
+    #+ remove all of them at the very end
 }
 
 main "$@"
