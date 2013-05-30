@@ -32,7 +32,7 @@ function parse() {
 	read -r full_line || break
 	line=${full_line#* }
 	type=${full_line%% *}
-	case $type in
+	case "$type" in
 	    \#\#) output-header;;
 	    \#) output-start-paragraph;;
 	    \#+) output-continue-paragraph;;
