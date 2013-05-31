@@ -1,31 +1,27 @@
 #!/bin/bash
 
+source twodee-arrays.bash
+source graphics.bash
+
+## x
+# x str n
+# repeats $str $n times, so:
+#` x abc 3
+#+ would return
+#` abcabcabc
+#+ Similar to Perl's "str" x n operator
 function x() {
-    local tmp
-    tmp=$(printf "%${2}s" " ")
-    tmp="${tmp// /$1}"
+    local thing_to_repeat n tmp
+    thing_to_repeat=$1
+    n=$2
+    tmp=$(printf "%${n}s" " ")
+    tmp="${tmp// /$thing_to_repeat}"
     echo "$tmp"
-}
-
-function initgraphics() {
-    stty -echo -icanon time 0 min 0
-}
-
-function echoat() {
-    local x y msg
-    x=$1
-    y=$2
-    msg=$3
-    echo -ne "\033[${y};${x}H${msg}"
-}
-
-function endgraphics() {
-    stty sane
 }
 
 ## onebounds
 # onebounds n lo hi
-# returns lo < n < hi 
+# returns true if lo < n < hi 
 function onebounds() {
     local n lo hi
     n=$1
@@ -34,35 +30,76 @@ function onebounds() {
     [[ $n -gt $lo ]] && [[ $n -lt $hi ]]
 }
 
-## ################
-## @param $1 x
-## @param $2 y
-## ################
-## Checks if x and y are within 0<=?<20
+## withinbounds
+# withinbounds {x => integer} {y => integer}
+# returns true if 0 <= x,y < 20
 function withinbounds() {
     local x y
     x=$1
     y=$2
-    onebounds $x -1 21 && \
-	onebounds $y -1 21
+    onebounds $x -1 20 && \
+	onebounds $y -1 20
 }
 
-xdir=( -1 0 1 1 1 0 -1 -1 )
-ydir=( -1 -1 -1 0 1 1 1 0 )
-declare -a golmap
-initgraphics
-echoat 4 4 "Ctrl-C to stop"
-trap "endgraphics; exit" SIGINT SIGTERM
+## randomize-map
+# randomize-map {no args}
+# goes through the whole array and sets each
+#+ element to either $CHAR_ON or $CHAR_OFF,
+#+ which are usually "x" and " ", respectively
+function randomize-map() {
+    local x y randchar
+    for((y=0;y<20;y++)); do
+	for((x=0;x<20;x++)); do
+	    if (($RANDOM % 2 == 0)); then
+		randchar=$CHAR_ON
+	    else
+		randchar=$CHAR_OFF
+	    fi
+            index golmap[$x,$y]= "$randchar"
+	done
+    done
+}
+
+## initialize-directions
+# initialize-directions {no args}
+# sets the direction array to a list of
+#+ x and y directions, separated by commas
+#+ for use with checking for neighbors
+function initialize-directions() {
+    dirs=( -1,-1 0,-1 1,-1 1,0 1,1 0,1 -1,1 -1,0 )
+}
+
+## init
+# init {no args}
+# sets up the graphics and a way to ensure that
+#+ everything gets cleaned up at the end, as well
+#+ as making the initial map and directions array
+function init() {
+    initgraphics
+    echoat 4 4 "Ctrl-C to stop"
+    trap "cleanup; exit" SIGINT SIGTERM
+    randomize-map
+    initialize-directions
+}
+
+function update() {
+    
+}
+
+function main {
+    golmap=( $(create-array 20,20) )
+    declare -a dirs
+    init
+    while true; do
+	update
+	display
+    done
+    cleanup
+}
+
 lastsize=$(tput cols)$(tput lines)
 
-for((y=0;y<20;y++)); do
-    for((x=0;x<20;x++)); do
-        golmap[$(($x + $y * 20))]=$(($RANDOM % 2))
-    done
-done
-
 while true; do
-    if true; then
     for((y=0;y<20;y++)); do
         for((x=0;x<20;x++)); do
             total=0
@@ -87,7 +124,7 @@ while true; do
             fi
         done
     done
-    fi
+
     cursize=$(tput cols)$(tput lines)
     [ $cursize = $lastsize ] || clear
     lastsize=$cursize
