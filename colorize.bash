@@ -31,3 +31,17 @@ function color() {
     echo -e "${colors[$colorname]}$@${colors[None]}"
 }
 
+function color-dir() { 
+    local IFS inputdir dirs dir first
+    inputdir=$1
+    first=1
+    IFS=/ dirs=( $inputdir )
+    for dir in "${dirs[@]}"; do 
+	if [[ $first != 1 ]]; then
+	    echo -n /
+	fi
+	echo -n "$(color $dir)"
+	first=0
+    done
+    echo
+}
