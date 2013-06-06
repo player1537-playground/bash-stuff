@@ -61,7 +61,7 @@ function template() {
     insidevar=0
     while true; do
 	read -r line || break
-	line=$(expr "$line" : "^[ \t]*\(.*\)[ \t]*$")
+	line=$(expr "$line" : "^[ 	]*\(.*\)[ 	]*$")
 	if [[ $line =~ ^[\ \\t]*# ]]; then
 	    continue
 	elif expr "$line" : ".*${varprefix}.*${varsuffix}" &>/dev/null; then
@@ -89,7 +89,7 @@ function template() {
 	    #suf=${line##*$codesuffix}
 	    #var=${line##*$codeprefix}
 	    #var=${var%%$codesuffix*}
-	    var=$(expr "$line" : ".*${equalprefix}[ \t]*\([^ \t]*\)[ \t]*${equalsuffix}")
+	    var=$(expr "$line" : ".*${equalprefix}[ 	]*\([^ 	]*\)[ 	]*${equalsuffix}")
 	    echo "export $var=\$("
 	    insidevar=1
 	#elif [[ $insidevar == 1 ]]; then
