@@ -4,6 +4,7 @@ WORK=$PWD/work
 FILE=$WORK/concurrent-writes
 
 function init() {
+    mkdir -p $WORK
     >$FILE
 }
 
