@@ -41,7 +41,8 @@
 ## KNOWN ISSUES
 # You can't have more than one tag on each line.  I was lazy about that, but if 
 #+ something just doesn't seem to be working... that's why.
-
+# Using {{ and }}, if you put spaces between them and the variable inside, like
+#+ {{ $var }}, then those spaces will be present in the output too.
 
 
 OUTPUTDIR=${OUTPUTDIR:-$PWD/output}
@@ -65,39 +66,45 @@ function template() {
 	if [[ $line =~ ^[\ \\t]*# ]]; then
 	    continue
 	elif expr "$line" : ".*${varprefix}.*${varsuffix}" &>/dev/null; then
-	    line=${line//$varprefix/}
-	    line=${line//$varsuffix/}
-	    echo "echo \"$line\""
+	    # {{ $var }}
+	    pre=${line%%$varprefix*}
+	    suf=${line##*$varsuffix}
+	    line=${line##*$varprefix}
+	    line=${line%%$varsuffix*}
+	    line=$(expr "$line" : "[ 	]*\([^ 	]*\)[ 	]")
+	    output-one-line "$pre$line$suf"
 	elif expr "$line" : ".*${codeprefix}.*${codesuffix}" &>/dev/null; then
+	    # {% code block %}
 	    pre=${line%%$codeprefix*}
 	    suf=${line##*$codesuffix}
 	    code=${line##*$codeprefix}
 	    code=${code%%$codesuffix*}
-	    [[ $pre ]] && echo "echo \"$pre\""
+	    [[ $pre ]] && output-one-line "$pre"
 	    echo "$code"
-	    [[ $suf ]] && echo "echo \"$suf\""
+	    [[ $suf ]] && output-one-line "$suf"
 	elif expr "$line" : ".*${equalprefix}${equalsuffix}" &>/dev/null; then
-	    #echo "EOF"
+	    # {==}
 	    echo ")"
 	    insidevar=0
 	elif expr "$line" : ".*${equalprefix}.*${equalsuffix}" &>/dev/null; then
-	    # {= VAR =}                     VAR=$(cat <EOF
+	    # {= VAR =}                     VAR=$(
+	    #                               cat <<EOF
 	    # rawr rawr rawr rawr rawr      rawr rawr rawr rawr rawr
-	    # {==}                          EOF
-	    #                               )
-	    #pre=${line%%$codeprefix*}
-	    #suf=${line##*$codesuffix}
-	    #var=${line##*$codeprefix}
-	    #var=${var%%$codesuffix*}
+	    #                               EOF
+	    # {==}                          )
 	    var=$(expr "$line" : ".*${equalprefix}[ 	]*\([^ 	]*\)[ 	]*${equalsuffix}")
 	    echo "export $var=\$("
 	    insidevar=1
-	#elif [[ $insidevar == 1 ]]; then
-	 #   echo "$line"
 	else
-	    printf "%s\n" "cat <<MOREEOF${CURLEVEL}" "$line" "MOREEOF${CURLEVEL}"
+	    output-one-line "$line"
 	fi
     done <$file
+}
+
+function output-one-line() {
+    local line
+    line=$1
+    printf "%s\n" "cat <<MOREEOF${CURLEVEL}" "$line" "MOREEOF${CURLEVEL}"
 }
 
 function include() {

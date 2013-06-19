@@ -1,7 +1,7 @@
 #!/bin/bash
 
-function color() {
-    declare -A colors
+# `declare -A colors` is passed by scope 
+function color-initialize-array() {
     colors[Black]='\033[0;30m'
     colors[DarkGray]='\033[1;30m'
     colors[Blue]='\033[0;34m'
@@ -20,9 +20,33 @@ function color() {
     colors[White]='\033[1;37m'
     colors[None]='\033[0m'
     colors[Underline]='\033[4m'
+}
 
+## color
+# color color_name {$@ text}
+# draws the text in the specified color
+function color() {
+    local color text
+    color=$1; shift
+    text="$@"
+    if [[ -z $text ]]; then
+	echo "Probably forgot to change the function to colorize"
+	return
+    fi
+    declare -A colors
+    color-initialize-array
+    echo -e "${colors[$color]}$text${colors[None]}"
+}
+
+## colorize
+# colorize {$@ text}
+# draws the text in some "random", but consistent color based on the
+#+ contents of the text.
+function colorize() {
+    declare -A colors
+    color-initialize-array
     possible_colors=( Blue LightBlue Green LightGreen Cyan LightCyan \
-	Red LightRed Purple LightPurple Brown Yellow LightGray )
+	Red LightRed Purple LightPurple Brown Yellow )
     sum=$(sum <(echo "$@"))
     sum=${sum%% *}
     sum=$(expr "$sum" : "^0*\(.*\)")
@@ -31,6 +55,10 @@ function color() {
     echo -e "${colors[$colorname]}$@${colors[None]}"
 }
 
+## color-dir
+# color-dir path/to/dir
+# draws each part of the argument (separated by slashes) in a color
+#+ specified by colorize
 function color-dir() { 
     local IFS inputdir dirs dir first
     inputdir=$1
@@ -40,7 +68,7 @@ function color-dir() {
 	if [[ $first != 1 ]]; then
 	    echo -n /
 	fi
-	echo -n "$(color $dir)"
+	echo -n "$(colorize $dir)"
 	first=0
     done
     echo
