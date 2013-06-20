@@ -51,7 +51,7 @@ declare -i CURLEVEL
 CURLEVEL=1
 
 function template() {
-    local file line code codeprefix codesuffix pre suf var insidevar whitepsace 
+    local file line code codeprefix codesuffix pre suf var insidevar whitepsace buffer NL
     file=${1?-Pass a file}
     codeprefix="{%"
     codesuffix="%}"
@@ -61,6 +61,8 @@ function template() {
     equalsuffix="=}"
     insidevar=0
     whitespace=$' \t'
+    NL=$'\n'
+    buffer=
     while true; do
 	read -r line || break
 	line=$(expr "$line" : "^[$whitespace]*\(.*\)[$whitespace]*$")
@@ -73,9 +75,13 @@ function template() {
 	    line=${line##*$varprefix}
 	    line=${line%%$varsuffix*}
 	    line=$(trim-whitespace "$line")
-	    output-one-line "$pre$line$suf"
+	    buffer+=${buffer:+$NL}"$pre$line$suf"
 	elif expr "$line" : ".*${codeprefix}.*${codesuffix}" &>/dev/null; then
 	    # {% code block %}
+	    if [[ -n $buffer ]]; then
+		output-one-line "$buffer"
+		buffer=
+	    fi
 	    pre=${line%%$codeprefix*}
 	    suf=${line##*$codesuffix}
 	    code=${line##*$codeprefix}
@@ -85,6 +91,10 @@ function template() {
 	    [[ $suf ]] && output-one-line "$suf"
 	elif expr "$line" : ".*${equalprefix}${equalsuffix}" &>/dev/null; then
 	    # {==}
+	    if [[ -n $buffer ]]; then
+		output-one-line "$buffer"
+		buffer=
+	    fi
 	    echo ")"
 	    insidevar=0
 	elif expr "$line" : ".*${equalprefix}.*${equalsuffix}" &>/dev/null; then
@@ -93,13 +103,20 @@ function template() {
 	    # rawr rawr rawr rawr rawr      rawr rawr rawr rawr rawr
 	    #                               EOF
 	    # {==}                          )
+	    if [[ -n $buffer ]]; then
+		output-one-line "$buffer"
+		buffer=
+	    fi
 	    var=$(expr "$line" : ".*${equalprefix}[$whitespace]*\([^$whitespace]*\)[$whitespace]*${equalsuffix}")
 	    echo "export $var=\$("
 	    insidevar=1
 	else
-	    output-one-line "$line"
+	    buffer+=${buffer:+$NL}"$line"
 	fi
     done <$file
+    if [[ -n $buffer ]]; then
+	output-one-line "$buffer"
+    fi
 }
 
 function trim-whitespace() {

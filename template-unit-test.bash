@@ -30,11 +30,9 @@ function failure() {
 
 one-test "Basic output" "$(cat <<EOF
 line 1
-line 2
 EOF
 )" "$(cat <<EOF
 line 1
-line 2
 EOF
 )"
 
@@ -132,3 +130,46 @@ EOF
 VAR is "this is var", for realz
 EOF
 )"
+
+export DEBUG=1
+one-test "Multi-line output, no {{ }}" "$(cat <<EOF
+line 1
+line 2
+EOF
+)" "$(cat <<EOF
+line 1
+line 2
+EOF
+)"
+
+one-test "Multi-line output, setting and retrieving variables {{ }}" "$(cat <<EOF
+{= TESTING =}
+this is one line
+{==}
+before {{ \$TESTING }} after
+before2 {{ \$TESTING }} after2
+EOF
+)" "$(cat <<EOF
+before this is one line after
+before2 this is one line after2
+EOF
+)"
+
+one-test "Multi-line output, setting and retrieving multi-line variables {{ }}" "$(cat <<EOF
+{= TESTING =}
+this is one line
+this is line two
+{==}
+before {{ \$TESTING }} after
+before2 {{ \$TESTING }} after2
+EOF
+)" "$(cat <<EOF
+before this is one line
+this is line two after
+before2 this is one line
+this is line two after2
+EOF
+)"
+
+
+
