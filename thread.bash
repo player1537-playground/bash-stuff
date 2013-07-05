@@ -10,7 +10,7 @@ function init() {
     mkdir -p $THREAD_FS
 }
 
-## count-files
+#^ count-files
 # count-files {dir :- ./}
 # gives the number of files in a directory, or $PWD if one 
 #+ isn't passed.  I'll do this the right way later.

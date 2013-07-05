@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# `declare -A colors` is passed by scope 
+## color-initialize-array
+#` color-initialize-array
+# $colors is passed by scope, and is 
+#+ an associative array, `declare -A`
 function color-initialize-array() {
     colors[Black]='\033[0;30m'
     colors[DarkGray]='\033[1;30m'
