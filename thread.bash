@@ -4,6 +4,7 @@ THREAD_FS=/tmp/threads
 THREAD_SLEEP=1s
 THREAD_RUNNING=running
 THREAD_STOPPED=stopped
+THREAD_DEBUG=${THREAD_DEBUG:-0}
 
 function init() {
     rm -rf $THREAD_FS
@@ -44,11 +45,19 @@ function spawn-thread() {
 # Ensures every thread in the given pool is complete before the
 #+ function returns
 function join-pool() {
-    local poolname dir 
+    local poolname dir dot_len
+    declare -i dot_len
+    dot_len=0
     poolname=$1
     dir=$THREAD_FS/$poolname
     while [[ $(count-files $dir) != 0 ]]; do
-	count-files $dir
+	if [[ $THREAD_DEBUG -gt 0 ]]; then
+	    echo -e "\r$(count-files $dir)$(x . $dot_len)     "
+	    dot_len+=1
+	    if [[ $dot_len == 3 ]]; then
+		dot_len=0
+	    fi
+	fi
 	sleep $THREAD_SLEEP
     done
     rm -r $dir
