@@ -1,5 +1,7 @@
 #!/bin/bash -u
 
+source x.bash
+
 THREAD_FS=/tmp/threads
 THREAD_SLEEP=1s
 THREAD_RUNNING=running
@@ -47,19 +49,20 @@ function spawn-thread() {
 function join-pool() {
     local poolname dir dot_len
     declare -i dot_len
-    dot_len=0
+    dot_len=1
     poolname=$1
     dir=$THREAD_FS/$poolname
     while [[ $(count-files $dir) != 0 ]]; do
 	if [[ $THREAD_DEBUG -gt 0 ]]; then
-	    echo -e "\r$(count-files $dir)$(x . $dot_len)     "
+	    echo -ne "\r$(count-files $dir)$(x . $dot_len)   \b\b\b"
 	    dot_len+=1
-	    if [[ $dot_len == 3 ]]; then
-		dot_len=0
+	    if [[ $dot_len == 4 ]]; then
+		dot_len=1
 	    fi
 	fi
 	sleep $THREAD_SLEEP
     done
+    echo
     rm -r $dir
 }
 
