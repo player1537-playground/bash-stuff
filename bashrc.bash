@@ -191,3 +191,4 @@ function _work() {
 complete -F _work work
 
 export BROWSER=$HOME/bin/conkeror
+function mvcd() { mv "$@"; cd $_; }
